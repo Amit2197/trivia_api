@@ -35,8 +35,9 @@ With Postgres running, restore a database using the trivia.psql file provided. F
 ```bash
 psql trivia < trivia.psql
 ```
+## Backend
 
-## Running the server
+### Running the server
 
 From within the `backend` directory first ensure you are working using your created virtual environment.
 
@@ -52,43 +53,15 @@ Setting the `FLASK_ENV` variable to `development` will detect file changes and r
 
 Setting the `FLASK_APP` variable to `flaskr` directs flask to use the `flaskr` directory and the `__init__.py` file to find the application. 
 
-## Tasks
 
-One note before you delve into your tasks: for each endpoint you are expected to define the endpoint and response data. The frontend will be a plentiful resource because it is set up to expect certain endpoints and response data formats already. You should feel free to specify endpoints in your own way; if you do so, make sure to update the frontend or you will get some unexpected behavior. 
+## Frontend
+From the frontend folder, run the following commands to start the client:
 
-1. Use Flask-CORS to enable cross-domain requests and set response headers. 
-2. Create an endpoint to handle GET requests for questions, including pagination (every 10 questions). This endpoint should return a list of questions, number of total questions, current category, categories. 
-3. Create an endpoint to handle GET requests for all available categories. 
-4. Create an endpoint to DELETE question using a question ID. 
-5. Create an endpoint to POST a new question, which will require the question and answer text, category, and difficulty score. 
-6. Create a POST endpoint to get questions based on category. 
-7. Create a POST endpoint to get questions based on a search term. It should return any questions for whom the search term is a substring of the question. 
-8. Create a POST endpoint to get questions to play the quiz. This endpoint should take category and previous question parameters and return a random questions within the given category, if provided, and that is not one of the previous questions. 
-9. Create error handlers for all expected errors including 400, 404, 422 and 500. 
-
-REVIEW_COMMENT
+```bash
+npm install // only once to install dependencies
+npm start 
 ```
-This README is missing documentation of your endpoints. Below is an example for your endpoint to get all categories. Please use it as a reference for creating your documentation and resubmit your code. 
-
-Endpoints
-GET '/categories'
-GET ...
-POST ...
-DELETE ...
-
-GET '/categories'
-- Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
-- Request Arguments: None
-- Returns: An object with a single key, categories, that contains a object of id: category_string key:value pairs. 
-{'1' : "Science",
-'2' : "Art",
-'3' : "Geography",
-'4' : "History",
-'5' : "Entertainment",
-'6' : "Sports"}
-
-```
-
+By default, the frontend will run on localhost:3000.
 
 ## Testing
 To run the tests, run
@@ -98,3 +71,151 @@ createdb trivia_test
 psql trivia_test < trivia.psql
 python test_flaskr.py
 ```
+
+# API Reference
+
+## Getting Started
+
+* Base URL: At present this app can only be run locally and is not hosted as a base URL. The backend app is hosted at the default, http://127.0.0.1:5000/, which is set as a proxy in the frontend configuration.
+* Authentication: This version of the application does not require authentication or API keys.
+
+## Error Handling
+
+Errors are returned as JSON objects in the following format:
+```json
+{
+    "success": False, 
+    "error": 400,
+    "message": "bad request"
+}
+```
+The API will return three error types when requests fail:
+
+* 400: Bad Request
+* 404: Resource Not Found
+* 405 Method Not Allowed
+* 422: Not Processable
+
+## Endpoints
+
+1. GET '/categories'
+3. GET '/questions'
+4. DELETE '/questions/<question_id>/delete'
+5. POST '/questions/add'
+6. POST '/questions/search'
+7. GET '/categories/<int:c_id>/questions'
+8. POST '/quizzes'
+
+## Responses
+---
+
+### GET '/categories'
+- General:
+    - Returns: An object with a single key, categories, that contains a object of id: category_string key:value pairs.
+- Sample: curl http://127.0.0.1:5000/categories
+    ```json
+    {
+        "categories": {
+            "1": "Science",
+            "2": "Art",
+            "3": "Geography",
+            "4": "History",
+            "5": "Entertainment",
+            "6": "Sports"
+        },
+        "success": true,
+        "total_categories": 6
+    }
+    ```
+
+### GET '/questions'
+- General:
+    - Returns: list of questions, 
+  number of total questions, current category, categories.
+  - Results are paginated in groups of 10. Include a request argument to choose page number, starting from 1.
+- Sample: curl http://127.0.0.1:5000/questions or http://127.0.0.1:5000/questions?page=1
+    ```json
+    {
+    "categories": {
+        "1": "Science",
+        "2": "Art",
+        "3": "Geography",
+        "4": "History",
+        "5": "Entertainment",
+        "6": "Sports"
+    },
+    "current_category": null,
+    "questions": [
+        {
+            "answer": "Apollo 13",
+            "category": 5,
+            "difficulty": 4,
+            "id": 2,
+            "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+        },
+        {
+            "answer": "Tom Cruise",
+            "category": 5,
+            "difficulty": 4,
+            "id": 4,
+            "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
+        }        
+    ],
+    "success": true,
+    "total_questions": 21
+    }
+    ```
+### DELETE '/questions/<question_id>/delete'
+- General:
+    - Returns: Deletes the question of the given ID if it exists. Returns the id of the deleted question, success value.
+- Sample: curl http://127.0.0.1:5000/questions/29/delete
+    ```json
+    {
+        "deleted": 29,
+        "success": true
+    }
+    ```
+
+### POST '/questions/add'
+
+* General:
+    * Creates a new question which will require the question and answer text, category, and difficulty score.
+* Sample: curl http://127.0.0.1:5000/books?page=3 -X POST -H "Content-Type: application/json" -d '{"question":"Is Bella Ciao Italian or Spanish?", "answer":"Doland trump is ...", "category":"5", "difficulty":"2"}'
+    ```json
+    {
+        "created": 31,
+        "questions": [
+            {
+                "answer": "Bella ciao is an Italian partisan song which originated during the Italian civil war",
+                "category": 5,
+                "difficulty": 2,
+                "id": 31,
+                "question": "Is Bella Ciao Italian or Spanish?"
+            }
+        ],
+        "success": true,
+        "total_question": 21
+    }
+    ```
+
+### POST '/questions/search'
+
+* General: Take searchTerm as input and return matching data list.
+* Sample: curl http://127.0.0.1:5000/questions/search -X POST -H "Content-Type: application/json" -d '{"search": "ciao"}'
+    ```json
+    {
+        "current_category": null,
+        "questions": [
+            {
+                "answer": "Bella ciao is an Italian partisan song which originated during the Italian civil war",
+                "category": 5,
+                "difficulty": 2,
+                "id": 31,
+                "question": "Is Bella Ciao Italian or Spanish?"
+            }
+        ],
+        "success": true,
+        "total_questions": 1
+    }
+    ```
+
