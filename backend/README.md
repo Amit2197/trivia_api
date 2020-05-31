@@ -96,20 +96,11 @@ The API will return three error types when requests fail:
 * 405 Method Not Allowed
 * 422: Not Processable
 
-## Endpoints
-
-1. GET '/categories'
-3. GET '/questions'
-4. DELETE '/questions/<question_id>/delete'
-5. POST '/questions/add'
-6. POST '/questions/search'
-7. GET '/categories/<int:c_id>/questions'
-8. POST '/quizzes'
-
-## Responses
+## API EndPoint Documentation
 ---
+<details>
+<summary>GET '/categories'</summary>
 
-### GET '/categories'
 - General:
     - Returns: An object with a single key, categories, that contains a object of id: category_string key:value pairs.
 - Sample: curl http://127.0.0.1:5000/categories
@@ -127,8 +118,11 @@ The API will return three error types when requests fail:
         "total_categories": 6
     }
     ```
+</details>
 
-### GET '/questions'
+<details>
+<summary>GET '/questions'</summary>
+
 - General:
     - Returns: list of questions, 
   number of total questions, current category, categories.
@@ -165,7 +159,11 @@ The API will return three error types when requests fail:
     "total_questions": 21
     }
     ```
-### DELETE '/questions/<question_id>/delete'
+</details>
+
+<details>
+<summary>DELETE '/questions/<question_id>/delete'</summary>
+
 - General:
     - Returns: Deletes the question of the given ID if it exists. Returns the id of the deleted question, success value.
 - Sample: curl http://127.0.0.1:5000/questions/29/delete
@@ -175,8 +173,10 @@ The API will return three error types when requests fail:
         "success": true
     }
     ```
+</details>
 
-### POST '/questions/add'
+<details>
+<summary>POST '/questions/add'</summary>
 
 * General:
     * Creates a new question which will require the question and answer text, category, and difficulty score.
@@ -197,8 +197,10 @@ The API will return three error types when requests fail:
         "total_question": 21
     }
     ```
+</details>
 
-### POST '/questions/search'
+<details>
+<summary>POST '/questions/search'</summary>
 
 * General: Take searchTerm as input and return matching data list.
 * Sample: curl http://127.0.0.1:5000/questions/search -X POST -H "Content-Type: application/json" -d '{"search": "ciao"}'
@@ -218,4 +220,59 @@ The API will return three error types when requests fail:
         "total_questions": 1
     }
     ```
+</details>
 
+<details>
+<summary>GET '/categories/<int:category_id>/questions'</summary>
+
+* General: return category based questions
+* Sample: curl http://127.0.0.1:5000/categories/5/questions
+    ```json
+    {
+    "current_category": 5,
+    "questions": [
+        {
+        "answer": "Apollo 13",
+        "category": 5,
+        "difficulty": 4,
+        "id": 2,
+        "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+        }
+    ],
+    "success": true,
+    "total_questions": 1
+    }
+    ```
+</details>
+
+<details>
+<summary>POST '/quizzes'</summary>
+
++ General: return random question on given Categories or From All Categories
++ Sample: curl http://127.0.0.1:5000/quizzes -X POST -H "Content-Type: application/json" -d '{"previous_questions": [], "quiz_category": {"type": "", "id": 1}}'
+
+    ```json
+    // Test 1
+    {
+    "question": {
+        "answer": "Blood",
+        "category": 1,
+        "difficulty": 4,
+        "id": 22,
+        "question": "Hematology is a branch of medicine involving the study of what?"
+    },
+    "success": true
+    }
+    // Test 2
+    {
+    "question": {
+        "answer": "The Liver",
+        "category": 1,
+        "difficulty": 4,
+        "id": 20,
+        "question": "What is the heaviest organ in the human body?"
+    },
+    "success": true
+    }
+    ```
+</details>
