@@ -17,8 +17,7 @@ from models import setup_db, Question, Category, db
 QUESTIONS_PER_PAGE = 10
 
 # Paginate the data/page
-
-
+"""FIXME: url endpoint ?page=2 failed"""
 def paginate_questions(request, selection):
     page = request.args.get('page', 1, type=int)
     start = ((page - 1) * QUESTIONS_PER_PAGE + 1)
