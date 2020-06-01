@@ -3,7 +3,8 @@ import unittest
 import json
 from flask_sqlalchemy import SQLAlchemy
 from flaskr import create_app
-from models import setup_db, Question, Category
+from sqlalchemy import func
+from models import setup_db, Question, Category, db
 
 
 class TriviaTestCase(unittest.TestCase):
@@ -46,7 +47,7 @@ class TriviaTestCase(unittest.TestCase):
 
     # Test questions with paging that return '200'
     def test_get_peginated_questions_with_categories(self):
-        res = self.client().get('/questions')
+        res = self.client().get('/questions?page=2')
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -140,14 +141,18 @@ class TriviaTestCase(unittest.TestCase):
 
     # Test search question
     def test_get_question_search_with_results(self):
+        searchTerm = 'you'
         res = self.client().post(
-            '/questions/search', json={'searchTerm': 'you'})
+            '/questions/search', json={'searchTerm': searchTerm})
         data = json.loads(res.data)
-
+        
+        # count_search = db.session.query(func.count(Question.id)).filter(Question.question.ilike('%{}%'.format(searchTerm))).scalar()
+        # OR
+        count_search = db.session.query(Question).filter(Question.question.ilike('%{}%'.format(searchTerm))).count()
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertTrue(data['questions'])
-        self.assertEqual(data['total_questions'], 2)
+        self.assertEqual(data['total_questions'], count_search)
         self.assertEqual(data['current_category'], None)
 
     # Test '404' if error 'not found' search question .

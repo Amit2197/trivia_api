@@ -84,7 +84,7 @@ python test_flaskr.py
 Errors are returned as JSON objects in the following format:
 ```json
 {
-    "success": False, 
+    "success": false, 
     "error": 400,
     "message": "bad request"
 }

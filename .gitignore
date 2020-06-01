@@ -1,8 +1,18 @@
 .vscode
+__pycache__
+venv
+
+
+/backend/__pycache__
+/backend/flaskr/__pycache__
+
+/frontend/node_modules
 
 # Byte-compiled / optimized / DLL files
-__pycache__
-*.pyc
+
+
 
 # Rope project settings
 .ropeproject
+
+.git

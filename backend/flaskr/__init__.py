@@ -8,6 +8,7 @@ from sqlalchemy.orm.exc import *
 from werkzeug.exceptions import *
 import sys
 import random
+from sqlalchemy import func
 # import custom models file
 from models import setup_db, Question, Category, db
 
@@ -15,17 +16,28 @@ from models import setup_db, Question, Category, db
 # Initialize data show 10 per page
 QUESTIONS_PER_PAGE = 10
 
-
 # Paginate the data/page
+
+
 def paginate_questions(request, selection):
     page = request.args.get('page', 1, type=int)
-    start = (page - 1) * QUESTIONS_PER_PAGE
-    end = start + QUESTIONS_PER_PAGE
-    # Listing data with dict format
-    questions = [question.format() for question in selection]
-    current_questions = questions[start:end]
-    # Return
-    return current_questions
+    start = ((page - 1) * QUESTIONS_PER_PAGE + 1)
+    end = start + QUESTIONS_PER_PAGE - 1
+    ss = selection.paginate(start, 9)
+    ss1 = [qq.format() for qq in ss.items]
+    return ss1
+
+
+# Paginate the data/page
+# def paginate_questions(request, selection):
+#     page = request.args.get('page', 1, type=int)
+#     start = (page - 1) * QUESTIONS_PER_PAGE
+#     end = start + QUESTIONS_PER_PAGE
+#     # Listing data with dict format
+#     questions = [question.format() for question in selection]
+#     current_questions = questions[start:end]
+#     # Return
+#     return current_questions
 
 
 # categories format in key, value with id and type format.
@@ -57,25 +69,25 @@ def create_app(test_config=None):
     # GET requests for all available categories.
 
     @app.route('/categories')
-    def retrieve_categories():
+    def categories():
         # get all data from table category order by id.
-        ctg_selection = Category.query.order_by(Category.id).all()
+        ctg_selection = Category.query.order_by(Category.id)
         # If ctg_selection get Null value then raise error "Not Found"
-        if ctg_selection is None:
+        if ctg_selection.all() is None:
             abort(404)
         # if get-data then jsonify data
         return jsonify({
             'success': True,
-            'categories': format_categories(ctg_selection),
-            'total_categories': len(ctg_selection)  # no use
+            'categories': format_categories(ctg_selection.all()),
+            'total_categories': ctg_selection.count()  # no use in frontend
         })
 
     # GET requests for all paginate Questions and categories.
 
     @app.route('/questions')
-    def retrieve_questions():
+    def questions():
         # query question_data from Question order by id.
-        qs_selection = Question.query.order_by(Question.id).all()
+        qs_selection = Question.query.order_by(Question.id)
         # query data from Category table order by id.
         ctg_selection = Category.query.order_by(Category.id).all()
         if ctg_selection is None:
@@ -83,13 +95,12 @@ def create_app(test_config=None):
         # Paginate data
         current_questions = paginate_questions(request, qs_selection)
         # Raise error if no any record found.
-        if len(current_questions) == 0:
-            abort(404)
+        
         # Return data in json format
         return jsonify({
             'success': True,
             'questions': current_questions,
-            'total_questions': len(qs_selection),
+            'total_questions': qs_selection.count(),
             'current_category': None,
             'categories': format_categories(ctg_selection)
         })
@@ -133,14 +144,14 @@ def create_app(test_config=None):
                                category=category, difficulty=difficulty)
             newQues.insert()
             # select question data and paginate
-            selection = Question.query.order_by(Question.id).all()
+            selection = Question.query.order_by(Question.id)
             current_ques = paginate_questions(request, selection)
             # return data in json format
             return jsonify({
                 'success': True,
                 'created': newQues.id,
                 'questions': current_ques,  # no use in frontend
-                'total_question': len(selection)  # no use in frontend
+                'total_question': selection.count()  # no use in frontend
             })
         # raise error
         else:
@@ -165,7 +176,7 @@ def create_app(test_config=None):
             return jsonify({
                 'success': True,
                 'questions': current_questions,
-                'total_questions': len(selection.all()),
+                'total_questions': selection.count(),
                 'current_category': None
             })
         # raise error
@@ -181,7 +192,7 @@ def create_app(test_config=None):
         try:
             # Fetch Question data row filter_by question_id.
             question = Question.query.filter(
-                Question.category == c_id).order_by(Question.id).all()
+                Question.category == c_id).order_by(Question.id)
             # Paginate data
             current_question = paginate_questions(request, question)
             # if current_question is None raise error
@@ -192,7 +203,7 @@ def create_app(test_config=None):
                 'success': True,
                 'current_category': c_id,
                 'questions': current_question,
-                'total_questions': len(question)
+                'total_questions': question.count()
             })
         # raise error
         except Exception:
@@ -226,11 +237,12 @@ def create_app(test_config=None):
                 else:
                     questions = Question.query.filter(Question.id.notin_(
                         previous_ques), Question.category ==
-                        q_category['id']).all()
+                        q_category['id'])
+                    questions_data = questions.all()
+                    len_questions = questions.count()
             # randomize questions within range or None
-            # (if len(questions) == 0 then None)
-            next_ques = questions[random.randrange(
-                0, len(questions))].format() if len(questions) > 0 else None
+            next_ques = questions_data[random.randrange(
+                0, len_questions)].format() if len_questions > 0 else None
             # return in json value
             return jsonify({
                 'success': True,
@@ -273,7 +285,7 @@ def create_app(test_config=None):
     @app.errorhandler(400)
     def bad_request(error):
         return jsonify({
-            "success": False,
+            "success": false,
             "error": 400,
             "message": "bad request"
         }), 400
