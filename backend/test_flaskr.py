@@ -17,7 +17,6 @@ class TriviaTestCase(unittest.TestCase):
         self.database_name = "trivia_test"
         self.database_path = "postgres:///{}".format(self.database_name)
         setup_db(self.app, self.database_path)
-
         self.new_ques = {
             'question': 'Who is the Chacha chaudry of world?',
             'answer': 'Do,land Trump',
@@ -145,10 +144,10 @@ class TriviaTestCase(unittest.TestCase):
         res = self.client().post(
             '/questions/search', json={'searchTerm': searchTerm})
         data = json.loads(res.data)
-        
-        # count_search = db.session.query(func.count(Question.id)).filter(Question.question.ilike('%{}%'.format(searchTerm))).scalar()
-        # OR
-        count_search = db.session.query(Question).filter(Question.question.ilike('%{}%'.format(searchTerm))).count()
+        # count_search = db.session.query(func.count(Question.id)).filter(
+        # Question.question.ilike('%{}%'.format(searchTerm))).scalar()
+        count_search = db.session.query(Question).filter(
+            Question.question.ilike('%{}%'.format(searchTerm))).count()
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertTrue(data['questions'])

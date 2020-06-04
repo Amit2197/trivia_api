@@ -12,7 +12,6 @@ from sqlalchemy import func
 # import custom models file
 from models import setup_db, Question, Category, db
 
-
 # Initialize data show 10 per page
 QUESTIONS_PER_PAGE = 10
 
@@ -21,23 +20,9 @@ QUESTIONS_PER_PAGE = 10
 
 def paginate_questions(request, selection):
     page = request.args.get('page', 1, type=int)
-    start = ((page - 1) * QUESTIONS_PER_PAGE + 1)
-    end = start + QUESTIONS_PER_PAGE - 1
-    ss = selection.paginate(start, 9)
+    ss = selection.paginate(page, per_page=QUESTIONS_PER_PAGE)
     ss1 = [qq.format() for qq in ss.items]
     return ss1
-
-
-# Paginate the data/page
-# def paginate_questions(request, selection):
-#     page = request.args.get('page', 1, type=int)
-#     start = (page - 1) * QUESTIONS_PER_PAGE
-#     end = start + QUESTIONS_PER_PAGE
-#     # Listing data with dict format
-#     questions = [question.format() for question in selection]
-#     current_questions = questions[start:end]
-#     # Return
-#     return current_questions
 
 
 # categories format in key, value with id and type format.
@@ -95,7 +80,7 @@ def create_app(test_config=None):
         # Paginate data
         current_questions = paginate_questions(request, qs_selection)
         # Raise error if no any record found.
-        
+
         # Return data in json format
         return jsonify({
             'success': True,
